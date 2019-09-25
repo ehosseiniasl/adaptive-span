@@ -81,6 +81,12 @@ PARAMS_CONFIG = {
             'help': 'dropout rate of ReLU and attention',
             'dest': 'dropout'
         },
+        '--no-ffn': {
+            'action': 'store_true',
+            'default': False,
+            'help': 'do no use ffn layer',
+            'dest': 'no_ffn'
+        }
     },
     # optimization-specific
     'optim_params': {

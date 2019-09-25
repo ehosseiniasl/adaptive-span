@@ -9,6 +9,7 @@
 
 import math
 import time
+import os
 
 import torch
 
@@ -24,6 +25,7 @@ from utils import (
     save_checkpoint,
     Logger)
 
+import ipdb
 
 def launch(env_params,
            model_params,
@@ -67,8 +69,11 @@ def launch(env_params,
     optimizer, scheduler = get_optimizer_and_scheduler(
         model=model, optim_params=optim_params)
 
+    log_dir = os.path.join('logs', trainer_params['checkpoint_path'].split('/')[-1][:-3])
+    # os.makedirs(log_dir, exist_ok=True)
+
     # create logger
-    logger = Logger()
+    logger = Logger(logdir=log_dir)
 
     # resume training from last checkpoint if exists
     iter_init = load_checkpoint(

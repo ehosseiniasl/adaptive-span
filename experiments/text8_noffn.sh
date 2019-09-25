@@ -29,7 +29,8 @@ args="
 --adapt-span-loss 0.0000005 \
 --adapt-span-cache \
 --batch-split 8 \
---checkpoint checkpoints/text8.pt
+--no-ffn \
+--checkpoint checkpoints/text8_noffn_512.pt
 "
 
 #--distributed \
@@ -38,10 +39,9 @@ echo "Training ..."
 # using the pytorch distributed launching
 #python3 -m torch.distributed.launch --nproc_per_node=$ngpus main.py $args
 CUDA_VISIBLE_DEVICES=$1 python3 main.py $args
+#&> text8_256.log
 
-#> text8.log &&
-
-# tail -f text8.log
+#tail -f text8_256.log
 
 #echo "Evaluation ..."
 # use a smaller batch size to reduce tokens without context and omitted tokens.

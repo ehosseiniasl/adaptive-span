@@ -13,7 +13,8 @@ import argparse
 
 import torch
 from adagrad_with_grad_clip import AdagradWithGradClip
-
+import sys
+from tensorboardX import SummaryWriter
 
 def _parse_args(params_config, args):
     parser = argparse.ArgumentParser()
@@ -168,8 +169,9 @@ def save_checkpoint(checkpoint_path, iter_no, model,
 ##############################################################################
 
 class Logger:
-    def __init__(self):
+    def __init__(self, logdir):
         self._state_dict = dict()
+        self.writer = SummaryWriter(logdir)
 
     def load_state_dict(self, state_dict):
         self._state_dict = state_dict
@@ -194,6 +196,8 @@ class Logger:
         self._log(title='train_bpc', value=train_bpc)
         self._log(title='val_bpc', value=val_bpc)
 
+        self.writer.add_scalar('train_bpc', train_bpc, step)
+        self.writer.add_scalar('val_bpc', val_bpc, step)
         if model.module.layers[0].attn.attn.adapt_span_enabled:
             avg_spans = []
             max_spans = []
@@ -208,4 +212,8 @@ class Logger:
             self._log('span_max', span_max)
             msg += "\tspan_avg: {:.0f}\tspan_max: {:.0f}".format(span_avg, span_max)
 
+            self.writer.add_scalar('span_avg', span_avg, step)
+            self.writer.add_scalar('span_max', span_max, step)
+
         print(msg)
+        sys.stdout.flush()

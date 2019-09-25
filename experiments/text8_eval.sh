@@ -15,7 +15,7 @@ args="
 --inner-hid-sz 2048 \
 --nheads 8 \
 --attn-span 8192 \
---block-sz 512 \
+--block-sz 256 \
 --batch-sz 64 \
 --lr 0.07 \
 --momentum 0 \
@@ -29,7 +29,7 @@ args="
 --adapt-span-loss 0.0000005 \
 --adapt-span-cache \
 --batch-split 8 \
---checkpoint checkpoints/text8.pt
+--checkpoint checkpoints/text8_256.pt
 "
 
 #--distributed \
@@ -37,7 +37,7 @@ args="
 echo "Training ..."
 # using the pytorch distributed launching
 #python3 -m torch.distributed.launch --nproc_per_node=$ngpus main.py $args
-CUDA_VISIBLE_DEVICES=$1 python3 main.py $args
+CUDA_VISIBLE_DEVICES=$1 python3 main.py $args --full-eval-mode --batch-sz 8  
 
 #> text8.log &&
 

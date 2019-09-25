@@ -171,9 +171,29 @@ class TransformerSeqLayer(nn.Module):
         return out
 
 
+class TransformerSeqLayerV1(nn.Module):
+    def __init__(self, hidden_size, **kargs):
+        nn.Module.__init__(self)
+        self.attn = MultiHeadSeqAttention(hidden_size=hidden_size, **kargs)
+        # self.ff = FeedForwardLayer(hidden_size=hidden_size, **kargs)
+        self.norm1 = nn.LayerNorm(hidden_size)
+        # self.norm2 = nn.LayerNorm(hidden_size)
+
+    def forward(self, h, h_cache, key_pe):
+        # h = B x M x H
+        # h_cache = B x L x H
+        h_all = torch.cat([h_cache, h], dim=1)  # B x (M+L) x H
+        attn_out = self.attn(h, h_all, h_all, key_pe)
+        h = self.norm1(h + attn_out)  # B x M x H
+        # ff_out = self.ff(h)
+        # out = self.norm2(h + ff_out)  # B x M x H
+        out = h
+        return out
+
+
 class TransformerSeq(nn.Module):
     def __init__(self, vocab_size, hidden_size, nb_heads, nb_layers,
-                 attn_span, **kargs):
+                 attn_span, no_ffn=False, **kargs):
         nn.Module.__init__(self)
         # token embeddings
         self.in_emb = nn.Embedding(vocab_size, hidden_size)
@@ -183,11 +203,24 @@ class TransformerSeq(nn.Module):
             torch.randn(1, hidden_size // nb_heads, attn_span))
 
         self.layers = nn.ModuleList()
-        self.layers.extend(
-            TransformerSeqLayer(
-                hidden_size=hidden_size, nb_heads=nb_heads,
-                attn_span=attn_span, **kargs)
-            for _ in range(nb_layers))
+        # self.layers.extend(
+        #     TransformerSeqLayer(
+        #         hidden_size=hidden_size, nb_heads=nb_heads,
+        #         attn_span=attn_span, **kargs)
+        #     for _ in range(nb_layers))
+        for _ in range(nb_layers):
+            if no_ffn:
+                self.layers.append(
+                    TransformerSeqLayerV1(
+                        hidden_size=hidden_size, nb_heads=nb_heads,
+                        attn_span=attn_span, **kargs)
+                )
+            else:
+                self.layers.append(
+                    TransformerSeqLayer(
+                        hidden_size=hidden_size, nb_heads=nb_heads,
+                        attn_span=attn_span, **kargs)
+                )
 
     def forward(self, x, h_cache):
         # x size = B x M
