@@ -86,6 +86,12 @@ PARAMS_CONFIG = {
             'default': False,
             'help': 'do no use ffn layer',
             'dest': 'no_ffn'
+        },
+        '--shared-ffn': {
+            'action': 'store_true',
+            'default': False,
+            'help': 'share all ffn layer',
+            'dest': 'shared_ffn'
         }
     },
     # optimization-specific
