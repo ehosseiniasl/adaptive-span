@@ -92,6 +92,12 @@ PARAMS_CONFIG = {
             'default': False,
             'help': 'share all ffn layer',
             'dest': 'shared_ffn'
+        },
+        '--shared-attn': {
+            'action': 'store_true',
+            'default': False,
+            'help': 'share all fattnfn layer',
+            'dest': 'shared_ffn'
         }
     },
     # optimization-specific
