@@ -265,7 +265,7 @@ class TransformerSeq(nn.Module):
         
         if shared_ffn:
             self.shared_ff = FeedForwardLayer(hidden_size=hidden_size, **kargs)
-        elif shared_attn:
+        if shared_attn:
             self.shared_attn = MultiHeadSeqAttention(hidden_size=hidden_size, **kargs)
             
         self.layers = nn.ModuleList()
