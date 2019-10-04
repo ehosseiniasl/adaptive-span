@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
+# Change ngpus to match the number of GPUs available.
+# If run out of GPU memory, increase "--batch-split" argument.
+
 # get the data
 #bash get_data.sh
 #mkdir -p checkpoints
 
-# Change ngpus to match the number of GPUs available.
-# If run out of GPU memory, increase "--batch-split" argument.
-
 ngpus=$2
 args="
---data data/text8 \
+--data data/enwik8 \
 --nlayers 12 \
 --hid-sz 512 \
 --inner-hid-sz 2048 \
@@ -23,29 +23,25 @@ args="
 --optim adagrad \
 --lr-warmup 32000 \
 --grad-clip 0.03 \
---niter 2000 \
---nbatches 500 \
+--niter 600 \
+--nbatches 1000 \
 --adapt-span \
 --adapt-span-loss 0.0000005 \
 --adapt-span-cache \
---batch-split 1 \
+--shared-ffn \
+--shared-attn \
 --distributed \
---checkpoint checkpoints/text8_512.pt
+--checkpoint checkpoints/enwik8_sharedall_512.pt
 "
 
 export CUDA_VISIBLE_DEVICES=$1
+
 echo "Training ..."
 # using the pytorch distributed launching
-python3 -m torch.distributed.launch --nproc_per_node=$ngpus main.py $args
-#CUDA_VISIBLE_DEVICES=$1 python3 main.py $args
+python3 -m torch.distributed.launch --master_port 1002 --nproc_per_node=$ngpus main.py $args
 
-#> text8.log &&
-
-# tail -f text8.log
 
 #echo "Evaluation ..."
-# use a smaller batch size to reduce tokens without context and omitted tokens.
+## use a smaller batch size to reduce tokens without context and omitted tokens.
 #python3 -m torch.distributed.launch --nproc_per_node=$ngpus main.py $args \
 #  --full-eval-mode --batch-sz 8
-
-

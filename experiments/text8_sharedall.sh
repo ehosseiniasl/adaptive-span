@@ -7,7 +7,7 @@
 # Change ngpus to match the number of GPUs available.
 # If run out of GPU memory, increase "--batch-split" argument.
 
-ngpus=1
+ngpus=$2
 args="
 --data data/text8 \
 --nlayers 12 \
@@ -23,7 +23,7 @@ args="
 --optim adagrad \
 --lr-warmup 32000 \
 --grad-clip 0.03 \
---niter 1000 \
+--niter 2000 \
 --nbatches 500 \
 --adapt-span \
 --adapt-span-loss 0.0000005 \
@@ -31,15 +31,16 @@ args="
 --batch-split 1 \
 --shared-attn \
 --shared-ffn \
+--distributed \
 --checkpoint checkpoints/text8_sharedall_512.pt
 "
 
-#--distributed \
 
+export CUDA_VISIBLE_DEVICES=$1
 echo "Training ..."
 # using the pytorch distributed launching
-#python3 -m torch.distributed.launch --nproc_per_node=$ngpus main.py $args
-CUDA_VISIBLE_DEVICES=$1 python3 main.py $args
+python3 -m torch.distributed.launch --nproc_per_node=$ngpus main.py $args
+#CUDA_VISIBLE_DEVICES=$1 python3 main.py $args
 #&> text8_256.log
 
 #tail -f text8_256.log

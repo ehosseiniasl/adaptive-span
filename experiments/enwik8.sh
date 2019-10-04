@@ -4,10 +4,10 @@
 # If run out of GPU memory, increase "--batch-split" argument.
 
 # get the data
-bash get_data.sh
-mkdir -p checkpoints
+#bash get_data.sh
+#mkdir -p checkpoints
 
-ngpus=8
+ngpus=$2
 args="
 --data data/enwik8 \
 --nlayers 12 \
@@ -32,13 +32,14 @@ args="
 --checkpoint checkpoints/enwik8.pt
 "
 
+export CUDA_VISIBLE_DEVICES=$1
 
 echo "Training ..."
 # using the pytorch distributed launching
 python3 -m torch.distributed.launch --nproc_per_node=$ngpus main.py $args
 
 
-echo "Evaluation ..."
-# use a smaller batch size to reduce tokens without context and omitted tokens.
-python3 -m torch.distributed.launch --nproc_per_node=$ngpus main.py $args \
-  --full-eval-mode --batch-sz 8
+#echo "Evaluation ..."
+## use a smaller batch size to reduce tokens without context and omitted tokens.
+#python3 -m torch.distributed.launch --nproc_per_node=$ngpus main.py $args \
+#  --full-eval-mode --batch-sz 8
